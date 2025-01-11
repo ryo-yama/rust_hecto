@@ -3,7 +3,6 @@ use crossterm::cursor::{Hide, MoveTo, Show};
 use crossterm::style::{Print};
 use crossterm::terminal::{enable_raw_mode, disable_raw_mode, size, Clear, ClearType};
 use std::io::{stdout, Error, Write};
-use core::fmt::Display;
 
 ///
 /// Size 構造体
