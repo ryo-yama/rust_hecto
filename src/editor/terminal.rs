@@ -11,18 +11,20 @@ use core::fmt::Display;
 #[derive(Copy, Clone)]
 pub struct Size
 {
-	pub width: u16,
-	pub height: u16,
+	pub width: usize,
+	pub height: usize,
 }
 
 ///
 /// Position 構造体
 ///
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Position
 {
-	pub x: u16,
-	pub y: u16,
+	// pub x: usize,
+	// pub y: usize,
+	pub col: usize,
+	pub row: usize,
 }
 
 /// //////////////////
@@ -43,7 +45,6 @@ impl Terminal
 		// raw モードを有効にする
 		enable_raw_mode()?;
 		Self::clear_screen()?;
-		Self::move_cursor_to(Position {x: 0, y: 0})?;
 		Self::execute()?;
 		Ok(())
 	}
@@ -77,27 +78,27 @@ impl Terminal
 	}
 
 	///
-	/// カーソルを指定した位置に移動する
+	/// キャレットを指定した位置に移動する
 	///
-	pub fn move_cursor_to(position: Position) -> Result<(), Error>
+	pub fn move_caret_to(position: Position) -> Result<(), Error>
 	{
-		Self::queue_command(MoveTo(position.x, position.y))?;
+		Self::queue_command(MoveTo(position.col as u16, position.row as u16))?;
 		Ok(())
 	}
 
 	///
-	/// カーソルを隠す
+	/// キャレットを隠す
 	///
-	pub fn hide_cursor() -> Result<(), Error>
+	pub fn hide_caret() -> Result<(), Error>
 	{
 		Self::queue_command(Hide)?;
 		Ok(())
 	}
 
 	///
-	/// カーソルを表示する
+	/// キャレットを表示する
 	///
-	pub fn show_cursor() -> Result<(), Error>
+	pub fn show_caret() -> Result<(), Error>
 	{
 		Self::queue_command(Show)?;
 		Ok(())
@@ -117,7 +118,9 @@ impl Terminal
 	///
 	pub fn size() -> Result<Size, Error>
 	{
-		let (width, height) = size()?;
+		let (width_u16, height_u16) = size()?;
+		let width = width_u16 as usize;
+		let height = height_u16 as usize;
 		Ok(Size{width, height})
 	}
 
