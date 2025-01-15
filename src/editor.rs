@@ -3,14 +3,10 @@ use core::cmp::min;
 use crossterm::event::{read, Event::{self, Key}, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 mod terminal;
 use terminal::{Position, Size, Terminal};
+mod view;
+use view::View;
 
-const INIT_CHAR_TILDE: &str = "~";
 const EXIT_MESSAGE: &str = "Goodbye!\r\n";
-const STR_CR_LF: &str = "\r\n";
-const STR_PKG_NAME: &str = env!("CARGO_PKG_NAME");
-const STR_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
-const STR_SPACE: &str = " ";
-
 
 ///
 /// Location 構造体
@@ -39,16 +35,6 @@ pub struct Editor
 ///
 impl Editor
 {
-	/// derive(Default) と 特性を付与したため
-	/// default を実装する必要がなくなった.
-	// ///
-	// /// default 定義
-	// ///
-	// pub const fn default() -> Self
-	// {
-	// 	Editor{exit_editor: false, location:}
-	// }
-
 	///
 	/// 実行
 	///
@@ -158,7 +144,7 @@ impl Editor
 			Terminal::clear_screen()?;
 			Terminal::print(EXIT_MESSAGE)?;
 		} else {
-			Self::draw_rows()?;
+			View::render()?;
 			Terminal::move_caret_to(Position {
 				col: self.location.x,
 				row: self.location.y,
@@ -168,51 +154,6 @@ impl Editor
 		// キャレットを表示する
 		Terminal::show_caret()?;
 		Terminal::execute()?;
-		Ok(())
-	}
-
-	///
-	/// ウェルカムメッセージの描画
-	///
-	fn draw_welcome_message() -> Result<(), Error>
-	{
-		let mut welcome_msg = format!("{STR_PKG_NAME} editor -- version {STR_PKG_VERSION}");
-		let width = Terminal::size()?.width as usize;
-		let str_len = welcome_msg.len();
-		let padding = (width - str_len) / 2;
-		let spaces = STR_SPACE.repeat(padding - 1);
-		welcome_msg = format!("~{spaces}{welcome_msg}");
-		welcome_msg.truncate(width);
-		Terminal::print(&welcome_msg)?;
-		Ok(())
-	}
-
-	///
-	/// ウェルカムメッセージの描画
-	///
-	fn draw_empty_row() -> Result<(), Error>
-	{
-		Terminal::print(INIT_CHAR_TILDE)?;
-		Ok(())
-	}
-
-	///
-	/// 行の描画
-	///
-	fn draw_rows() -> Result<(), Error>
-	{
-		let Size {height, ..} = Terminal::size()?;
-		for cur_rows in 0..height {
-			Terminal::clear_line()?;
-			if cur_rows == height / 3 {
-				Self::draw_welcome_message()?;
-			} else {
-				Self::draw_empty_row()?;
-			}
-			if cur_rows + 1 < height {
-				Terminal::print(STR_CR_LF)?;
-			}
-		}
 		Ok(())
 	}
 }
